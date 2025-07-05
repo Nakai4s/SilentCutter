@@ -174,5 +174,6 @@ cython_debug/
 .pypirc
 
 # wav, mp4 file
-.wav
-.mp4
+*.wav
+*.mp4
+output/
