@@ -1,20 +1,11 @@
 import subprocess
+import os
 from pydub import AudioSegment
 
-OUTPUT_PATH = "output/"
-
-# INPUT_FILE = "input.mp4"
-TRACK1_FILE = OUTPUT_PATH + "track1.wav"
-TRACK2_FILE = OUTPUT_PATH + "track2.wav"
-NORMALIZED1 = OUTPUT_PATH + "norm1.wav"
-NORMALIZED2 = OUTPUT_PATH + "norm2.wav"
-FINAL_AUDIO = OUTPUT_PATH + "final_audio.wav"
-FINAL_VIDEO = OUTPUT_PATH + "output.mp4"
-
 # ステップ1: 音声トラックを抽出
-def extract_audio_tracks(input_file):
-    subprocess.run(["ffmpeg", "-y", "-i", input_file, "-map", "0:a:0", TRACK1_FILE])
-    subprocess.run(["ffmpeg", "-y", "-i", input_file, "-map", "0:a:1", TRACK2_FILE])
+def extract_audio_tracks(input_file, track1_path, track2_path):
+    subprocess.run(["ffmpeg", "-y", "-i", input_file, "-map", "0:a:0", track1_path])
+    subprocess.run(["ffmpeg", "-y", "-i", input_file, "-map", "0:a:1", track2_path])
 
 # ステップ2: 音量を正規化（pydubで）
 def normalize_audio(input_file, output_file):
