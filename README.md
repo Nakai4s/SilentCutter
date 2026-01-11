@@ -74,3 +74,11 @@ MIT License
 
 - [FFmpeg](https://ffmpeg.org/)
 - [pydub](https://github.com/jiaaro/pydub)
+
+---
+
+## Update (2025-xx-xx)
+
+- Processing now runs in a single ffmpeg pass (normalize + silence removal).
+- pydub is no longer required.
+- Intermediate WAVs (track/norm) are no longer generated; only `output.wav` is produced.
