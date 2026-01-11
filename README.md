@@ -1,13 +1,13 @@
 # SilentCutter
 
-SilentCutter is a small CLI tool that takes an input MP4, normalizes audio loudness, removes silence, and outputs a new MP4.
+SilentCutter is a small CLI tool that takes an input MP4, normalizes audio loudness, removes silence, and outputs a WAV.
 
 ## Features
 
 - Supports 1 or 2 audio tracks in the MP4
 - Loudness normalization (target: -20 LUFS)
 - Removes silent sections
-- Outputs a new MP4 with the original video stream
+- Outputs a WAV only (video is not preserved)
 
 ## Requirements
 
@@ -17,7 +17,7 @@ SilentCutter is a small CLI tool that takes an input MP4, normalizes audio loudn
 ## Usage
 
 ```bash
-python main.py input.mp4 output.mp4
+python main.py input.mp4
 ```
 
 ## How It Works (Summary)
@@ -26,14 +26,13 @@ python main.py input.mp4 output.mp4
 2. Normalize loudness with `ffmpeg` `loudnorm`
 3. Mix tracks if two exist
 4. Remove silence with `ffmpeg` `silenceremove`
-5. Mux the processed audio with the original video
+5. Save the processed audio to the output WAV
 
 ## Output Files
 
 | File | Description |
 | --- | --- |
-| `output.mp4` | Final MP4 with normalized audio and silence removed |
-| `output/output.wav` | Temporary audio output used for muxing |
+| `output/output.wav` | Final WAV with normalized audio and silence removed |
 
 ## Configuration (edit `editUtil.py`)
 
