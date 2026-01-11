@@ -19,9 +19,7 @@ def run():
     # wavファイルの出力処理
     try:
         track_count = editUtil.get_audio_track_count(input_file)
-        editUtil.extract_audio_tracks(input_file, track_count)
-        editUtil.normalize_audio(track_count)
-        editUtil.cut_silence(track_count)
+        editUtil.process_audio(input_file, track_count)
         messagebox.showinfo("完了", f"出力完了：{editUtil.output_path + editUtil.FINAL_AUDIO}")
     except subprocess.CalledProcessError:
         messagebox.showerror("エラー", "実行中にエラーが発生しました")
