@@ -1,84 +1,52 @@
-
 # SilentCutter
-2つの音声トラックを持つMP4ファイルから、**両方のトラックが同時に無音である部分をカット**し、**音量を揃えてwavファイルを出力**するPythonツールです。
 
----
+SilentCutter is a small CLI tool that takes an input MP4, normalizes audio loudness, removes silence, and outputs a new MP4.
 
-## 主な機能
+## Features
 
-- **音量の正規化**：2つの音声トラックの音量を統一
-- **無音部分のカット**：両方の音声が無音の区間を削除
+- Supports 1 or 2 audio tracks in the MP4
+- Loudness normalization (target: -20 LUFS)
+- Removes silent sections
+- Outputs a new MP4 with the original video stream
 
----
+## Requirements
 
-## 使い方
+- Python 3.x
+- `ffmpeg` and `ffprobe` available in PATH
 
-### 1. 必要なものをインストール
-
-```bash
-pip install pydub numpy
-```
-
-**ffmpeg** も必要です（コマンドラインで `ffmpeg` が動作するようにしてください）。
-
-- macOS: `brew install ffmpeg`
-- Ubuntu: `sudo apt install ffmpeg`
-- Windows: Chocolatey や [公式サイト](https://ffmpeg.org/)から導入
-
----
-
-### 2. 実行
+## Usage
 
 ```bash
-python main.py
+python main.py input.mp4 output.mp4
 ```
 
-処理が完了すると、`output.wav` が生成されます。
+## How It Works (Summary)
 
----
+1. Detect audio track count with `ffprobe`
+2. Normalize loudness with `ffmpeg` `loudnorm`
+3. Mix tracks if two exist
+4. Remove silence with `ffmpeg` `silenceremove`
+5. Mux the processed audio with the original video
 
-## 動作の流れ（技術概要）
+## Output Files
 
-1. `ffmpeg`で2つの音声トラックを抽出
-2. `pydub`で音量を正規化（目標 -20dBFS）
-3. 100ms単位で同時無音区間を検出・除去
-4. 音声を2chで再統合し、映像とマージして出力
+| File | Description |
+| --- | --- |
+| `output.mp4` | Final MP4 with normalized audio and silence removed |
+| `output/output.wav` | Temporary audio output used for muxing |
 
----
+## Configuration (edit `editUtil.py`)
 
-## 設定項目（コード内）
+- `SILENCE_THRESH_DB`: Silence threshold in dB (default: -40)
+- `SILENCE_CHUNK_SEC`: Minimum silence duration in seconds (default: 0.1)
+- `TARGET_LOUDNESS_I`: Target integrated loudness (default: -20.0)
+- `TARGET_TRUE_PEAK`: Target true peak (default: -1.5)
+- `TARGET_LRA`: Target loudness range (default: 11.0)
 
-- `silence_thresh = -40`：無音とみなす音量のしきい値（dBFS）
-- `chunk_size = 100`：分析単位（ms）
-- `target_dBFS = -20.0`：正規化の目標音量
-
----
-
-## 出力ファイル
-
-| ファイル名 | 内容 |
-|------------|------|
-| `output.wav` | 最終出力（音量正規化＋無音カット） |
-| `norm1.wav`, `norm2.wav` | 音量正規化された各トラック |
-| `track1.wav`, `track2.wav` | 元のトラック抽出ファイル |
-
----
-
-## ライセンス
+## License
 
 MIT License
 
----
-
-## クレジット
+## Credits
 
 - [FFmpeg](https://ffmpeg.org/)
-- [pydub](https://github.com/jiaaro/pydub)
-
----
-
-## Update (2025-xx-xx)
-
-- Processing now runs in a single ffmpeg pass (normalize + silence removal).
-- pydub is no longer required.
-- Intermediate WAVs (track/norm) are no longer generated; only `output.wav` is produced.

@@ -1,39 +1,54 @@
-import tkinter as tk
-from tkinter import filedialog, messagebox
 import subprocess
+import sys
+
 import editUtil
 
-# mp4ファイルを選択する
-def select_file():
-    path = filedialog.askopenfilename(
-        filetypes=[("Video Files", "*.mp4")])
-    file_path.set(path)
 
-# カット処理を実行する
-def run():
-    input_file = file_path.get()
-    if not input_file:
-        messagebox.showerror("エラー", "ファイルが選択されていません")
-        return
+def mux_video_with_audio(input_file: str, output_file: str) -> None:
+    # Replace the input audio with the processed track while copying video.
+    audio_path = editUtil.output_path + editUtil.FINAL_AUDIO
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-y",
+            "-i",
+            input_file,
+            "-i",
+            audio_path,
+            "-map",
+            "0:v",
+            "-map",
+            "1:a",
+            "-c:v",
+            "copy",
+            "-c:a",
+            "aac",
+            output_file,
+        ],
+        check=True,
+    )
 
-    # wavファイルの出力処理
+
+def run_cli(args: list[str]) -> int:
+    # Parse CLI args, run audio processing, then mux into the output MP4.
+    if len(args) != 3:
+        print("Usage: python main.py <input.mp4> <output.mp4>")
+        return 2
+
+    input_file = args[1]
+    output_file = args[2]
+
     try:
         track_count = editUtil.get_audio_track_count(input_file)
         editUtil.process_audio(input_file, track_count)
-        messagebox.showinfo("完了", f"出力完了：{editUtil.output_path + editUtil.FINAL_AUDIO}")
-    except subprocess.CalledProcessError:
-        messagebox.showerror("エラー", "実行中にエラーが発生しました")
+        mux_video_with_audio(input_file, output_file)
+    except (subprocess.CalledProcessError, ValueError) as exc:
+        print(f"Error: {exc}")
+        return 1
 
-# GUIセットアップ
-root = tk.Tk()
-root.title("SilentCutter")
+    print(f"Done: {output_file}")
+    return 0
 
-file_path = tk.StringVar()
 
-tk.Label(root, text="mp4ファイルを選択").pack(pady=5)
-tk.Entry(root, textvariable=file_path, width=50).pack()
-tk.Button(root, text="参照", command=select_file).pack(pady=5)
-
-tk.Button(root, text="カット実行", command=run).pack(pady=10)
-
-root.mainloop()
+if __name__ == "__main__":
+    raise SystemExit(run_cli(sys.argv))

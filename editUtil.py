@@ -13,6 +13,7 @@ output_path = "output/"
 
 
 def get_audio_track_count(input_file: str) -> int:
+    # Count audio streams in the input file using ffprobe.
     result = subprocess.run(
         [
             "ffprobe",
@@ -35,6 +36,7 @@ def get_audio_track_count(input_file: str) -> int:
 
 
 def process_audio(input_file: str, track_count: int) -> None:
+    # Normalize loudness, mix tracks, and remove silence in a single ffmpeg pass.
     if track_count not in (1, 2):
         raise ValueError("Only 1 or 2 audio tracks are supported.")
 
@@ -73,6 +75,7 @@ def process_audio(input_file: str, track_count: int) -> None:
 
 
 def get_audio_duration_sec(audio_path: str) -> float:
+    # Read audio duration in seconds via ffprobe.
     result = subprocess.run(
         [
             "ffprobe",
