@@ -1,36 +1,39 @@
 import os
 import subprocess
 
+# 出力ディレクトリ
+OUTPUT_DIR = "output"
+# 出力ファイル名
 FINAL_AUDIO = "output.wav"
+# 出力パス
+OUTPUT_PATH = os.path.join(OUTPUT_DIR, FINAL_AUDIO)
 
+# 無音除去の閾値とチャンクサイズ
 SILENCE_THRESH_DB = -40
+# 無音除去のチャンクサイズ
 SILENCE_CHUNK_SEC = 0.1
 TARGET_LOUDNESS_I = -20.0
 TARGET_TRUE_PEAK = -1.5
 TARGET_LRA = 11.0
 
-output_path = "output/"
-
 
 def get_audio_track_count(input_file: str) -> int:
-    # Count audio streams in the input file using ffprobe.
+    # ffprobeで入力ファイルの音声ストリーム数を取得する。
     result = subprocess.run(
         [
             "ffprobe",
-            "-v",
-            "error",
-            "-select_streams",
-            "a",
-            "-show_entries",
-            "stream=index",
-            "-of",
-            "csv=p=0",
+            "-v", "error",              # エラー以外のログを抑制
+            "-select_streams", "a",     # 音声ストリームのみ選択
+            "-show_entries", "stream=index",  # ストリーム番号を表示
+            "-of", "csv=p=0",           # CSV形式（ヘッダなし）で出力
             input_file,
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
+        check=True,
     )
+    # 各行が1つの音声ストリームに対応するため、行数がトラック数になる
     lines = result.stdout.strip().splitlines()
     return len(lines)
 
@@ -40,7 +43,7 @@ def process_audio(input_file: str, track_count: int) -> None:
     if track_count not in (1, 2):
         raise ValueError("Only 1 or 2 audio tracks are supported.")
 
-    os.makedirs(output_path, exist_ok=True)
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     loudnorm = f"loudnorm=I={TARGET_LOUDNESS_I}:TP={TARGET_TRUE_PEAK}:LRA={TARGET_LRA}"
     silenceremove = (
@@ -68,27 +71,7 @@ def process_audio(input_file: str, track_count: int) -> None:
             filter_complex,
             "-map",
             "[out]",
-            os.path.join(output_path, FINAL_AUDIO),
+            OUTPUT_PATH,
         ],
         check=True,
     )
-
-
-def get_audio_duration_sec(audio_path: str) -> float:
-    # Read audio duration in seconds via ffprobe.
-    result = subprocess.run(
-        [
-            "ffprobe",
-            "-v",
-            "error",
-            "-show_entries",
-            "format=duration",
-            "-of",
-            "default=noprint_wrappers=1:nokey=1",
-            audio_path,
-        ],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
-    return float(result.stdout.strip())

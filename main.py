@@ -1,7 +1,8 @@
 import subprocess
 import sys
 
-import editUtil
+import edit_util
+
 
 def run_cli(args: list[str]) -> int:
     # Parse CLI args, run audio processing, then write output/output.wav.
@@ -12,13 +13,13 @@ def run_cli(args: list[str]) -> int:
     input_file = args[1]
 
     try:
-        track_count = editUtil.get_audio_track_count(input_file)
-        editUtil.process_audio(input_file, track_count)
+        track_count = edit_util.get_audio_track_count(input_file)
+        edit_util.process_audio(input_file, track_count)
     except (subprocess.CalledProcessError, ValueError) as exc:
         print(f"Error: {exc}")
         return 1
 
-    print(f"Done: {editUtil.output_path}{editUtil.FINAL_AUDIO}")
+    print(f"Done: {edit_util.OUTPUT_PATH}")
     return 0
 
 
